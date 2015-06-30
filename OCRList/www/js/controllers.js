@@ -1,14 +1,15 @@
-angular.module('starter.controllers', [])
+angular.module('starter.controllers', ['ngOpenFB'])
+//angular.module('starter.controllers', ['starter.services', 'ngOpenFB'])
 
-.controller('AppCtrl', function($scope, $ionicModal, $timeout) {
-  
+.controller('AppCtrl', function ($scope, $ionicModal, $timeout, ngFB) {
+
   // With the new view caching in Ionic, Controllers are only called
   // when they are recreated or on app start, instead of every page change.
   // To listen for when this page is active (for example, to refresh data),
   // listen for the $ionicView.enter event:
   //$scope.$on('$ionicView.enter', function(e) {
   //});
-  
+
   // Form data for the login modal
   $scope.loginData = {};
 
@@ -39,6 +40,18 @@ angular.module('starter.controllers', [])
       $scope.closeLogin();
     }, 1000);
   };
+
+  $scope.fbLogin = function () {
+    ngFB.login({scope: 'email,read_stream,publish_actions'}).then(
+        function (response) {
+            if (response.status === 'connected') {
+                $scope.closeLogin();
+                alert('Facebook login succeeded');
+            } else {
+                alert('Facebook login failed');
+            }
+        });
+};
 })
 
 .controller('PlaylistsCtrl', function($scope) {
@@ -53,4 +66,17 @@ angular.module('starter.controllers', [])
 })
 
 .controller('PlaylistCtrl', function($scope, $stateParams) {
+})
+
+.controller('ProfileCtrl', function ($scope, ngFB) {
+    ngFB.api({
+        path: '/me',
+        params: {fields: 'id,name'}
+    }).then(
+        function (user) {
+            $scope.user = user;
+        },
+        function (error) {
+            alert('Facebook error: ' + error.error_description);
+        });
 });
